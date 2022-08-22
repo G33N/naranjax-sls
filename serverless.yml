@@ -1,0 +1,13 @@
+service: matiasCeliz-ejercicio-sls
+
+plugins:
+  - serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  stage: dev
+
+functions: ${file(./functions.yml)}
+resources: ${file(./resources.yml)}

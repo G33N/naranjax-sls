@@ -1,0 +1,55 @@
+CreateClient:
+  handler: create-client/create-client.handler
+  name: ${self:service}-${self:provider.stage}-create-client-function
+  environment:
+    CLIENTS_TABLE: !Ref ClientsTable
+    CLIENTS_CREATED_TOPIC: !Ref ClientCreatedTopic
+  iamRoleStatementsInherit: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:Publish
+      Resource:
+        - !Ref ClientCreatedTopic
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource:
+        - !GetAtt ClientsTable.Arn
+  events:
+    - http:
+        path: /client
+        method: post
+        cors: true
+
+CreateCard:
+  handler: create-card/create-card.handler
+  name: ${self:service}-${self:provider.stage}-create-card-function
+  environment:
+    CLIENTS_TABLE: !Ref ClientsTable
+  iamRoleStatementsInherit: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:UpdateItem
+      Resource:
+        - !GetAtt ClientsTable.Arn
+  events:
+    - sqs:
+        arn: !GetAtt CreateCardQueue.Arn
+
+CreateGift:
+  handler: create-gift/create-gift.handler
+  name: ${self:service}-${self:provider.stage}-create-gift-function
+  environment:
+    CLIENTS_TABLE: !Ref ClientsTable
+  iamRoleStatementsInherit: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:UpdateItem
+      Resource:
+        - !GetAtt ClientsTable.Arn
+  events:
+    - sqs:
+        arn: !GetAtt CreateGiftQueue.Arn
